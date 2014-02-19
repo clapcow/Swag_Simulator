@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style type="text/css">
+body{ margin:40px; background:#666; }
+#my_canvas{ background:#FFF; border:#000 1px solid; }
+</style>
+<script>
+
+var bkg = new Image();
+var grassimg = new Image();
+var bulletimg = new Image();
+//movement speed
+
+var mvs = 11;
+var jump = 13
+var ran = Math.floor((Math.random()*250)+150);
+//velocity variables
+var vx = 0, vy = 0;
+//speed of clouds
+var clouds = 2;
+//check if your shooting a bullet
+var shooting = false;
+//grass speed
+var grass = 0;
+//check if your on the ground
+var onboard = false;
+
+//moving forward in world
+var forward =  false;
+
+var mouseY =0;
+var mouseX =0;
+var ammo = 3;
+
+var dir = "right";
+//load source images
+bkg.src = "bkgimg.jpg";
+grassimg.src = "grass.jpg";
+bulletimg.src = "bullet.jpg"
+function initCanvas(){
+	var ctx = document.getElementById('my_canvas').getContext('2d');
+	var cW = ctx.canvas.width, cH = ctx.canvas.height;
+    ctx.canvas.addEventListener('mousemove', function(event){
+        mouseX = event.clientX - ctx.canvas.offsetLeft;
+        mouseY = event.clientY - ctx.canvas.offsetTop;
+		
+		
+    });
+	function Background(){
+        this.gx = 0,this.x = 0, this.y = 0, this.w = bkg.width, this.h = bkg.height;
+        this.render = function(){
+			if(forward){
+				if("D" in keys_down){
+					clouds = mvs +2;
+					grass = mvs;
+				}
+				else{
+					grass = 0;
+					clouds = 2;
+				}
+			}
+			else{
+				clouds = 1;
+				grass = 0;
+			}
+            ctx.drawImage(bkg, this.x-=clouds, 0);
+			ctx.drawImage(grassimg,this.gx-=grass,450);
+            if(this.x <= -cW + mvs +2){
+                this.x = 0;
+
+			}
+			if(this.gx <= -cW +mvs){
+				this.gx = 0;				
+			}
+		}
+	}
+	//make a backgrounf	
+	var background = new Background();
+	
+	function Player(){
+	
+        this.x = 300, this.y = 90, this.w = 30, this.h = 30, this.hit = false;
+        ctx.fillStyle = "black";
+        this.render = function(){
+			
+            ctx.fillRect(this.x, this.y, this.w, this.h);
+			
+		}
+	}
+	//make a new player
+	var player = new Player();
+	
+	function Gun(){
+        this.x=0, this.y=0 ,this.w = bulletimg.width, this.h = bulletimg.height, this.bullets = [],this.hit = false;
+        
+        this.render = function(){	
+			
+			
+			for(var i = 0;i<this.bullets.length;i++){
+				var m = this.bullets[i];
+				//draw bullets
+				
+				ctx.fillRect(m.x+=14,m.y,this.w,this.h);
+			}
+				
+				
+
+			
+		}
+	}
+	//make a new gun
+	var gun = new Gun();
+    
+
+	
+	function animate(){
+		
+        ctx.save();
+        ctx.clearRect(0, 0, cW, cH); 
+		//load background
+		background.render();
+		vx = 0; 
+		//gravity
+		vy+=1;
+		//controls
+		if ("W" in keys_down && onboard){
+			vy -= jump;
+		}
+		if ("D" in keys_down ){
+			vx += mvs;
+		}
+		if ("A" in keys_down ){
+			vx -= mvs;
+			forward = false;
+		}
+		if (" " in keys_down ){				
+			if(ammo!=0 && !shooting){
+				//add bullet to array
+				gun.bullets.push({"x":player.x,"y":player.y,"w":3,"h":10});
+				ammo--;
+				shooting = true;
+			}
+		}
+		
+		//ending controls
+		//velocity
+		player.x += vx;
+		player.y += vy;
+		onboard = false;
+		
+		//dont fly away player
+		if(player.x <= 0){
+			player.x = 1;
+		}
+		if(player.x >= 375){
+			player.x = 374;
+			if("D" in keys_down){
+				forward = true;
+			}
+
+		}
+		if(player.y >= 435){
+			player.y = 434;
+			vy = 0;
+			onboard = true;
+		}
+		if(player.y <= 80){
+			player.y = 80;
+			vy = 0;
+		}
+		//ending of movement boundaries
+		
+		//drawing
+		ctx.font="20px Georgia";
+		ctx.fillText("Swag Simulator 2014",20,20);
+		ctx.fillText("Bullets: "+ ammo, 300, 20);
+		//render player
+		player.render();
+		
+		//render gun
+		gun.render();
+		
+		//end of drawing
+        ctx.restore();
+		
+		
+    }
+	//run the function animate every 40 ms
+    var animateInterval = setInterval(animate, 30);
+	
+	//array of keys currently down
+	var keys_down = {};
+	//event listener for keydown
+	document.addEventListener('keydown', function(event) {
+        var key_press = String.fromCharCode(event.keyCode);
+		if(key_press == "D"){
+			dir = "right"
+		}
+		if(key_press =="A"){
+			dir = "left"
+		}		
+        //alert(event.keyCode+" | "+key_press);
+		keys_down[key_press]=1;
+	});
+	
+	//event listener for key up
+	document.addEventListener('keyup', function(event) {
+        var key_press = String.fromCharCode(event.keyCode);
+        //alert(event.keyCode+" | "+key_press);
+		if(key_press == " "){
+			shooting = false;
+		}
+		if(key_press == "D"){
+			dir = "right"
+		}
+		if(key_press =="A"){
+			dir = "left"
+		}
+		delete keys_down[key_press];
+	});
+	
+	
+	//event listener for More ammo button
+	speed_up_button.addEventListener('mousedown', function(event){
+		mvs += 1;
+		jump +=1;
+	});	
+	amm.addEventListener('mousedown', function(event){
+		ammo += 999;
+		
+	});
+	speed_down_button.addEventListener('mousedown', function(event){
+		if(mvs >= 1 ){
+			mvs -= 1;
+		}
+		if(jump >= 0 ){
+			jump -=1;
+		}
+	});
+}	
+//eat key
+window.onkeydown = function(e) { 
+  return !(e.keyCode == 32);
+};
+
+//when load pages load game
+window.addEventListener('load', function(event) {
+    initCanvas();
+});
+</script>
+</head>
+<body>
+
+	<div id ="canvas_container"><canvas id="my_canvas" width="600" height="500"></canvas></div>
+	<button id="amm">More Ammo</button>
+	<button id ="speed_up_button">Speed up</button>
+	<button id ="speed_down_button">Speed down</button>
+	
+</body>  
+</html>
