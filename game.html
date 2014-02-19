@@ -40,9 +40,11 @@ grassimg.src = "grass.jpg";
 bulletimg.src = "bullet.jpg"
 function initCanvas(){
 	var ctx = document.getElementById('my_canvas').getContext('2d');
+	var soundtrack1=document.getElementById("soundtrack"); 
+	soundtrack1.play();
 	var cW = ctx.canvas.width, cH = ctx.canvas.height;
     ctx.canvas.addEventListener('mousemove', function(event){
-        mouseX = event.clientX - ctx.canvas.offsetLeft;
+		mouseX = event.clientX - ctx.canvas.offsetLeft;
         mouseY = event.clientY - ctx.canvas.offsetTop;
 		
 		
@@ -256,6 +258,8 @@ window.addEventListener('load', function(event) {
 	<button id="amm">More Ammo</button>
 	<button id ="speed_up_button">Speed up</button>
 	<button id ="speed_down_button">Speed down</button>
-	
+	<audio id = "soundtrack" loop>
+		<source src="soundtrack.mp3" type="audio/mpeg">
+    </audio>
 </body>  
 </html>
